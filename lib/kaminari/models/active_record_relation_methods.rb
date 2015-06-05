@@ -10,6 +10,8 @@ module Kaminari
     end
 
     def total_count(column_name = :all, options = {}) #:nodoc:
+      est = ActiveRecord::Base.connection.execute("SELECT reltuples FROM pg_class WHERE relname = '#{entry_name.pluralize}'").first.fetch("reltuples")
+      return est if est > 1_000_000
       # #count overrides the #select which could include generated columns referenced in #order, so skip #order here, where it's irrelevant to the result anyway
       @total_count ||= begin
         c = except(:offset, :limit, :order)
